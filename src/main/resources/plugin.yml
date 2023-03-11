@@ -1,5 +1,5 @@
 name: PaperCustomResourceToolkit
-version: '${version}'
+version: '0.0.1'
 main: daylightnebula.papercustomresourcetoolkit.PaperCustomResourceToolkit
 api-version: 1.19
 authors: [ DaylightNebula ]

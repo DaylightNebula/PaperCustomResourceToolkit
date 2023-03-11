@@ -21,7 +21,11 @@ Todolist:
     - [ ] Local server should not be started until this finishes
     - [ ] Broadcast resource pack finalized event
   - [ ] PNG textures converted to models
-  - [ ] Allow for 
+  - [ ] BBModels should be converted to models
+    - [ ] Animation support
+  - [ ] Fonts
+    - [ ] All png textures should have a font option (for GUIs and chat)
+    - [ ] Easy way of adding custom fonts without overriding base text
 - [ ] Custom items (maybe able to steal from rpg toolkit)
   - [ ] Load from json files
   - [ ] Optionally use custom texture or model
