@@ -2,17 +2,11 @@ The goal of this toolkit is to make a simple solution for custom blocks, entitie
 
 Goals:
  - Toggleable automatic resource pack generation on startup
- - Toggleable and configurable local server host for the resource pack (should only be used for testing, this should be disabled for public facing servers)
  - Custom blocks, entities, items and guis that can be easily and quickly made via .json files
  - BBModels can be used for custom models for all custom objects
  - PNG textures can be used for custom items textures
 
 Todolist:
-- [ ] Local Server
-  - [ ] Only open on resource pack finalized event
-  - [ ] Host via https
-  - [ ] Settings to kick if pack is not accepted
-  - [ ] Resend resource pack packet if loaded is sent to quickly after accepted
 - [ ] Resource pack generator
   - [x] Universal way of storing and saving the models after they are packed
     - [x] Other plugins can easily add folders to load assets from
@@ -22,6 +16,7 @@ Todolist:
     - [x] Local server should not be started until this finishes
     - [x] Broadcast resource pack finalized event
     - [x] Generate mcmeta automatically
+  - [x] Automatic export to .minecraft folder if requested
   - [ ] PNG textures converted to models
   - [ ] BBModels should be converted to models
     - [ ] Animation support
