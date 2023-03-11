@@ -14,12 +14,14 @@ Todolist:
   - [ ] Settings to kick if pack is not accepted
   - [ ] Resend resource pack packet if loaded is sent to quickly after accepted
 - [ ] Resource pack generator
-  - [ ] Universal way of storing and saving the models before they are packed
-    - [ ] Other plugins can easily add folders to load assets from
-  - [ ] Pack creation should start from onLoad but not finalized until the first tick
-    - [ ] Should be run async
-    - [ ] Local server should not be started until this finishes
-    - [ ] Broadcast resource pack finalized event
+  - [x] Universal way of storing and saving the models after they are packed
+    - [x] Other plugins can easily add folders to load assets from
+  - [x] Pack creation should start from onLoad but not finalized until the first tick
+    - [x] Should be run async
+    - [x] Zip compress on finalize before event
+    - [x] Local server should not be started until this finishes
+    - [x] Broadcast resource pack finalized event
+    - [x] Generate mcmeta automatically
   - [ ] PNG textures converted to models
   - [ ] BBModels should be converted to models
     - [ ] Animation support

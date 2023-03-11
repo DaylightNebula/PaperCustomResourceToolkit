@@ -1,6 +1,7 @@
 package daylightnebula.papercustomresourcetoolkit
 
 import daylightnebula.papercustomresourcetoolkit.packer.ResourcePack
+import daylightnebula.papercustomresourcetoolkit.server.RPHTTPSServer
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
@@ -21,6 +22,9 @@ class PaperCustomResourceToolkit : JavaPlugin() {
     }
 
     override fun onEnable() {
+        // register listeners
+        Bukkit.getPluginManager().registerEvents(RPHTTPSServer, plugin)
+
         // run finalize packer
         Bukkit.getScheduler().runTaskAsynchronously(this, Runnable { ResourcePack.finalizePack() })
     }
