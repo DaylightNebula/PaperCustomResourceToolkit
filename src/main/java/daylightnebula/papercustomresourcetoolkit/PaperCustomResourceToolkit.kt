@@ -16,6 +16,9 @@ class PaperCustomResourceToolkit : JavaPlugin() {
         // save plugin
         plugin = this
 
+        // load configs
+        ConfigManager.init()
+
         // initialize packer
         ResourcePack.init()
         ResourcePack.addAssetsFolder(File(dataFolder, "assets"))
@@ -30,6 +33,7 @@ class PaperCustomResourceToolkit : JavaPlugin() {
     }
 
     override fun onDisable() {
-
+        // save config with any changes
+        ConfigManager.save()
     }
 }
