@@ -49,10 +49,6 @@ object BBModelConverter {
         val boneStacks = json.getJSONArray("outliner").map { createBoneStack(it as JSONObject, elements) }
         val animations = json.getJSONArray("animations").map { convertToPreRenderAnimation(it as JSONObject) }
 
-        for (boneStack in boneStacks) {
-            printElementRecursively(boneStack)
-        }
-
         // render and return animations
         val tracker = hashMapOf<RenderedAnimationPosition, Pair<Material, Int>>()
         return AnimatedModelResource(
@@ -203,7 +199,6 @@ object BBModelConverter {
     }
     class BoneAnimatedComponent(uuid: UUID, origin: Vector, val children: List<AnimatedComponent>): AnimatedComponent() {
         override fun render(resolution: JSONObject, textures: JSONObject, allocate: (json: JSONObject) -> Pair<Material, Int>): List<Pair<Material, Int>> {
-            println("ATTEMPT TO RENDER BONE")
             return children.map { it.render(resolution, textures, allocate) }.flatten()
         }
     }
@@ -213,7 +208,6 @@ object BBModelConverter {
             textures: JSONObject,
             allocate: (json: JSONObject) -> Pair<Material, Int>
         ): List<Pair<Material, Int>> {
-            println("ATTEMPTING TO RENDER ELEMENT")
             val elementsJson = JSONArray()
             elements.forEach { elementsJson.put(it.toJson(resolution)) }
             return listOf(
