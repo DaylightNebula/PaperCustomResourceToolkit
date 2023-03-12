@@ -4,3 +4,10 @@ main: daylightnebula.papercustomresourcetoolkit.PaperCustomResourceToolkit
 api-version: 1.19
 authors: [ DaylightNebula ]
 description: A simple toolkit for creating custom entities, blocks, and items.
+commands:
+  createanimatedmodel:
+    description: yes
+    usage: /createanimatedmodel <model id>
+  removeanimatedmodels:
+    description: yes
+    usage: /removeanimatedmodels

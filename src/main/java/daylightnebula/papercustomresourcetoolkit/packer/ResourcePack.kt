@@ -40,6 +40,10 @@ object ResourcePack {
     private val blockFolder = File(modelsFolder, "block")
     private val metaFile = File(packFolder, "pack.mcmeta")
 
+    fun getResource(key: String): Resource? {
+        return resources[key]
+    }
+
     internal fun init() {
         // initialize sub system
         ItemAllocator.init()
@@ -68,9 +72,12 @@ object ResourcePack {
         folder.listFiles()?.forEach { file ->
             if (file.isDirectory)
                 addAssetsFolder(file)
-            else when (file.extension) {
-                "png" -> addPNGTexture(file)
-                "bbmodel" -> addBBModel(file)
+            else {
+                when (file.extension) {
+                    "png" -> addPNGTexture(file)
+                    "bbmodel" -> addBBModel(file)
+                }
+                println("Created resource ${file.nameWithoutExtension}")
             }
         }
     }

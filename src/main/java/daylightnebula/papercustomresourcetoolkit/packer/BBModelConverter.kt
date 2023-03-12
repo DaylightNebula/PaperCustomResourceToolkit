@@ -5,6 +5,7 @@ import org.bukkit.util.Vector
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.IllegalArgumentException
+import java.math.BigDecimal
 import java.util.*
 
 object BBModelConverter {
@@ -54,7 +55,8 @@ object BBModelConverter {
         val animators = hashMapOf<UUID, PreRenderAnimator>()
         val animatorsJson = json.getJSONObject("animators")
         animatorsJson.keys().forEach { key ->
-            animators[UUID.fromString(key)] = convertToPreRenderAnimator(animatorsJson.getJSONObject(key))
+            val uuid = UUID.fromString(key)
+            animators[uuid] = convertToPreRenderAnimator(uuid, animatorsJson.getJSONObject(key))
         }
 
         // save pre render animation
@@ -66,7 +68,7 @@ object BBModelConverter {
             animators
         )
     }
-    private fun convertToPreRenderAnimator(json: JSONObject): PreRenderAnimator {
+    private fun convertToPreRenderAnimator(uuid: UUID, json: JSONObject): PreRenderAnimator {
         // create channel key frame lists
         val positionKeyFrames = mutableListOf<PreRenderKeyFrame>()
         val rotationKeyFrames = mutableListOf<PreRenderKeyFrame>()
@@ -86,7 +88,7 @@ object BBModelConverter {
         }
 
         // create and return animator
-        return PreRenderAnimator(UUID.fromString(json.getString("uuid")), positionKeyFrames, rotationKeyFrames, scaleKeyFrames)
+        return PreRenderAnimator(uuid, positionKeyFrames, rotationKeyFrames, scaleKeyFrames)
     }
     private fun convertToPreRenderKeyFrame(json: JSONObject): PreRenderKeyFrame {
         // convert data point
@@ -107,6 +109,8 @@ object BBModelConverter {
     private fun handlePossibleStringInDoubleConversion(any: Any): Double {
         if (any is String) return any.toDoubleOrNull() ?: throw IllegalArgumentException("Could not convert $any to double")
         else if (any is Double) return any
+        else if (any is Integer) return any.toDouble()
+        else if (any is BigDecimal) return any.toDouble()
         else throw IllegalArgumentException("Could not convert $any to double")
     }
 
