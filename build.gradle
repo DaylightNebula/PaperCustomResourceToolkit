@@ -29,11 +29,6 @@ dependencies {
 
     // json stuff
     implementation "org.json:json:20230227"
-
-    // ktor
-    implementation "io.ktor:ktor-server-core:2.2.3"
-    implementation "io.ktor:ktor-server-netty:2.2.3"
-    implementation "io.ktor:ktor-network-tls-certificates:2.2.3"
 }
 
 def targetJavaVersion = 19

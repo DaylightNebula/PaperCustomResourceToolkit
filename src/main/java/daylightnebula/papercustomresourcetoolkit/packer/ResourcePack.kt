@@ -28,18 +28,22 @@ object ResourcePack {
     private var passToMinecraft = true
 
     private val resources = hashMapOf<String, Resource>()
-    private const val namespace = "custom_resource_toolkit"
+    const val namespace = "custom_resource_toolkit"
     private val packFolder = File("ResourcePack")
     private val assetsFolder = File(packFolder, "assets")
     private val namespaceFolder = File(assetsFolder, namespace)
     private val texturesFolder = File(namespaceFolder, "textures/$namespace")
-    private val minecraftFolder = File(assetsFolder, "minecraft")
+    val minecraftFolder = File(assetsFolder, "minecraft")
     private val modelsFolder = File(minecraftFolder, "models")
-    private val itemFolder = File(modelsFolder, "item")
+    val itemFolder = File(modelsFolder, "item")
     private val blockFolder = File(modelsFolder, "block")
     private val metaFile = File(packFolder, "pack.mcmeta")
 
     internal fun init() {
+        // initialize sub system
+        ItemAllocator.init()
+        AtlasManager.init()
+
         // get should generate config value
         shouldGenerate = ConfigManager.getValueFromJson("shouldGenerateResourcePack", true)
         passToMinecraft = ConfigManager.getValueFromJson("attemptMinecraftExport", true)
@@ -70,8 +74,29 @@ object ResourcePack {
         }
     }
 
+    private var currentTextureID = 0
     private fun addPNGTexture(file: File) {
+        // get new texture id
+        val texID = currentTextureID++
 
+        // copy texture into the pack
+        val target = File(texturesFolder, "$texID.png")
+        file.copyTo(target, overwrite = true)
+
+        // generate model for the texture
+        val model = JSONObject()
+            .put("parent", "minecraft:item/generated")
+            .put(
+                "textures",
+                JSONObject()
+                    .put("layer0", "$namespace:$namespace/$texID")
+            )
+
+        // add custom model
+        val modelData = ItemAllocator.addCustomModel(model)
+
+        // save resource
+        resources.put(file.nameWithoutExtension, Resource(modelData.first, modelData.second))
     }
 
     private fun addBBModel(file: File) {
@@ -81,6 +106,9 @@ object ResourcePack {
     internal fun finalizePack() {
         // if a resource pack was generated
         if (shouldGenerate) {
+            // finalize sub systems
+            ItemAllocator.cleanup()
+
             // zip resource pack
             packFile = File("ResourcePack.zip")
             ZipManager.zip(packFolder, packFile)
@@ -99,7 +127,7 @@ object ResourcePack {
 
             // attempt to copy to .minecraft
             if (passToMinecraft)
-                packFile.copyTo(File(System.getenv("APPDATA"), "/.minecraft/resourcepacks/passToMinecraft.zip"), overwrite = true)
+                packFolder.copyRecursively(File(System.getenv("APPDATA"), "/.minecraft/resourcepacks/passToMinecraft"), overwrite = true)
 //                File("%APPDATA%/.minecraft/resourcepacks/passToMinecraft.zip").writeBytes(packBytes)
         } else
             Bukkit.getScheduler().runTask(

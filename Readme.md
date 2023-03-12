@@ -17,7 +17,7 @@ Todolist:
     - [x] Broadcast resource pack finalized event
     - [x] Generate mcmeta automatically
   - [x] Automatic export to .minecraft folder if requested
-  - [ ] PNG textures converted to models
+  - [x] PNG textures converted to models
   - [ ] BBModels should be converted to models
     - [ ] Animation support
   - [ ] Fonts
@@ -38,6 +38,10 @@ Todolist:
     - [ ] Custom Item Attack
     - [ ] Custom Item Break
     - [ ] Custom Item Pickup (include give command)
+  - [ ] Crafting recipes
+    - [ ] Disable crafting recipes for items with custom model data
+    - [ ] New system for creating crafting recipes that contain custom items
+    - [ ] Add custom crafting recipes for custom items
 - [ ] Custom blocks
   - [ ] Load from json files
   - [ ] Custom item created automatically to be the item representation of this
