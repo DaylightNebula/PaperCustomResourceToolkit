@@ -1,9 +1,11 @@
 package daylightnebula.papercustomresourcetoolkit.packer
 
+import org.bukkit.Material
+import org.bukkit.util.Vector
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.IllegalArgumentException
-import java.math.BigDecimal
+import java.util.*
 
 object BBModelConverter {
     // config functions
@@ -11,24 +13,138 @@ object BBModelConverter {
     private val displayJson = JSONObject().put("head", JSONObject().put("scale", JSONArray().put(1.6).put(1.6).put(1.6)))
 
     // public functions
-    fun convertStatic(json: JSONObject): JSONObject {
+    fun convertStatic(json: JSONObject): Pair<UUID, JSONObject> {
         val resolution = json.getJSONObject("resolution")
-        return JSONObject()
-            .put("elements", json.getJSONArray("elements").map { convertElement(it as JSONObject, resolution) })
-            .put("textures", loadTextures(json.getJSONArray("textures")))
-            .put("display", displayJson)
+        val elements = json.getJSONArray("elements").map { convertElement(it as JSONObject, resolution) }
+        return Pair(
+            UUID.randomUUID(),
+            JSONObject()
+                .put("elements", elements)
+                .put("textures", loadTextures(json.getJSONArray("textures")))
+                .put("display", displayJson)
+        )
     }
 
-    fun convertAnimatedModel(json: JSONObject): Array<JSONObject> {
+    fun convertAnimatedModelFromBBModel(json: JSONObject, allocate: (json: JSONObject) -> Pair<Material, Int>): AnimatedModelResource {
+        // get converted elements and bone stack
+        val elements = convertAnimatedModelToParts(json)
+        val boneStacks = json.getJSONArray("outliner").map { createBoneStack(it as JSONObject, elements) }
+        val animations = json.getJSONArray("animations").map { convertToPreRenderAnimation(it as JSONObject) }
+
+        // render and return animations
+        return AnimatedModelResource(
+            RenderedAnimationStack(elements.map { pair -> allocate(pair.value) }),
+            animations.map { RenderedAnimation(it.name, renderAnimation(boneStacks, it)) }
+        )
+    }
+
+    // post render animation stuff
+    data class RenderedAnimation(val name: String, val stacks: List<RenderedAnimationStack>)
+    data class RenderedAnimationStack(val stack: List<Pair<Material, Int>>)
+    private fun renderAnimation(boneStacks: List<BoneAnimatedComponent>, animation: PreRenderAnimation): List<RenderedAnimationStack> {
+        return listOf() //RenderedAnimationStack(listOf()) // TODO
+    }
+
+    // pre render animation stuffs
+    data class PreRenderAnimation(val uuid: UUID, val name: String, val loop: Boolean, val length: Double, val animators: HashMap<UUID, PreRenderAnimator>)
+    data class PreRenderAnimator(val uuid: UUID, val positionKeyFrames: List<PreRenderKeyFrame>, val rotationKeyFrames: List<PreRenderKeyFrame>, val scaleKeyFrames: List<PreRenderKeyFrame>)
+    data class PreRenderKeyFrame(val time: Double, val vec: Vector, val isLinear: Boolean)
+    private fun convertToPreRenderAnimation(json: JSONObject): PreRenderAnimation {
+        // generate animators hash map
+        val animators = hashMapOf<UUID, PreRenderAnimator>()
+        val animatorsJson = json.getJSONObject("animators")
+        animatorsJson.keys().forEach { key ->
+            animators[UUID.fromString(key)] = convertToPreRenderAnimator(animatorsJson.getJSONObject(key))
+        }
+
+        // save pre render animation
+        return PreRenderAnimation(
+            UUID.fromString(json.getString("uuid")),
+            json.getString("name"),
+            json.getString("loop") == "loop",
+            json.getDouble("length"),
+            animators
+        )
+    }
+    private fun convertToPreRenderAnimator(json: JSONObject): PreRenderAnimator {
+        // create channel key frame lists
+        val positionKeyFrames = mutableListOf<PreRenderKeyFrame>()
+        val rotationKeyFrames = mutableListOf<PreRenderKeyFrame>()
+        val scaleKeyFrames = mutableListOf<PreRenderKeyFrame>()
+
+        // load keyframes
+        json.getJSONArray("keyframes").forEach {
+            val keyFrame = it as JSONObject
+
+            // get key frame list and add key frame
+            when(val channel = keyFrame.getString("channel")) {
+                "position" -> positionKeyFrames
+                "rotation" -> rotationKeyFrames
+                "scale" -> scaleKeyFrames
+                else -> throw IllegalArgumentException("Unknown key frame channel $channel")
+            }.add(convertToPreRenderKeyFrame(keyFrame))
+        }
+
+        // create and return animator
+        return PreRenderAnimator(UUID.fromString(json.getString("uuid")), positionKeyFrames, rotationKeyFrames, scaleKeyFrames)
+    }
+    private fun convertToPreRenderKeyFrame(json: JSONObject): PreRenderKeyFrame {
+        // convert data point
+        val dataPointJson = json.getJSONArray("data_points").first() as JSONObject
+        val dataPoint = Vector(
+            handlePossibleStringInDoubleConversion(dataPointJson.get("x")),
+            handlePossibleStringInDoubleConversion(dataPointJson.get("y")),
+            handlePossibleStringInDoubleConversion(dataPointJson.get("z")),
+        )
+
+        // create and return key frame
+        return PreRenderKeyFrame(
+            json.getDouble("time"),
+            dataPoint,
+            json.getString("interpolation") == "linear"
+        )
+    }
+    private fun handlePossibleStringInDoubleConversion(any: Any): Double {
+        if (any is String) return any.toDoubleOrNull() ?: throw IllegalArgumentException("Could not convert $any to double")
+        else if (any is Double) return any
+        else throw IllegalArgumentException("Could not convert $any to double")
+    }
+
+    // bone stuff
+    abstract class AnimatedComponent(val uuid: UUID)
+    class BoneAnimatedComponent(uuid: UUID, val origin: Vector, val children: List<AnimatedComponent>): AnimatedComponent(uuid)
+    class ElementAnimatedComponent(uuid: UUID, val element: JSONObject): AnimatedComponent(uuid)
+    private fun createBoneStack(root: JSONObject, elements: HashMap<UUID, JSONObject>): BoneAnimatedComponent {
+        val origin = root.getJSONArray("origin")
+        return BoneAnimatedComponent(
+            UUID.fromString(root.getString("uuid")),
+            Vector(origin.getDouble(0), origin.getDouble(1), origin.getDouble(2)),
+            root.getJSONArray("children").map {
+                if (it is String) {
+                    val uuid = UUID.fromString(it)
+                    ElementAnimatedComponent(uuid, elements[uuid]!!)
+                } else if (it is JSONObject)
+                    createBoneStack(it, elements)
+                else
+                    throw IllegalArgumentException("Cannot convert $it to AnimatedComponent")
+            }
+        )
+    }
+    private fun convertAnimatedModelToParts(json: JSONObject): HashMap<UUID, JSONObject> {
         val resolution = json.getJSONObject("resolution")
         val elements = json.getJSONArray("elements")
         val textures = loadTextures(json.getJSONArray("textures"))
-        return elements.map {
-            JSONObject()
-                .put("elements", listOf(convertElement(it as JSONObject, resolution)))
-                .put("textures", textures)
-                .put("display", displayJson)
-        }.toTypedArray()
+        val output = hashMapOf<UUID, JSONObject>()
+        elements.forEach {
+            val elementJson = it as JSONObject
+            val element = convertElement(elementJson, resolution)
+            output[UUID.fromString(elementJson.getString("uuid"))] =
+                JSONObject()
+                    .put("elements", listOf(element))
+                    .put("textures", textures)
+                    .put("display", displayJson)
+        }
+        return output
     }
 
     // helper functions

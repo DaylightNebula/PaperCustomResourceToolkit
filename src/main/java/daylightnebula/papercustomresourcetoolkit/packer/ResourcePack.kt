@@ -11,6 +11,7 @@ import org.json.JSONObject
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.util.*
 
 object ResourcePack {
 
@@ -102,16 +103,13 @@ object ResourcePack {
         val json = JSONObject(file.readText())
 
         if (json.has("animations")) {
-            val model = BBModelConverter.convertAnimatedModel(json)
-            val elements = model.map {
-                val data = ItemAllocator.addCustomModel(it)
-                StaticModelResource(data.first, data.second)
+            resources[file.nameWithoutExtension] = BBModelConverter.convertAnimatedModelFromBBModel(json) {
+                ItemAllocator.addCustomModel(it)
             }
-            resources[file.nameWithoutExtension] = AnimatedModelResource(elements)
         } else {
-            val model = BBModelConverter.convertStatic(json)
+            val (uuid, model) = BBModelConverter.convertStatic(json)
             val modelData = ItemAllocator.addCustomModel(model)
-            resources[file.nameWithoutExtension] = StaticModelResource(modelData.first, modelData.second)
+            resources[file.nameWithoutExtension] = StaticModelResource(uuid, modelData.first, modelData.second)
         }
     }
 
@@ -152,8 +150,8 @@ object ResourcePack {
 }
 abstract class Resource
 class ImageResource(val material: Material, val customModelID: Int): Resource()
-class StaticModelResource(val material: Material, val customModelID: Int): Resource()
-class AnimatedModelResource(val parts: List<StaticModelResource>): Resource()
+class StaticModelResource(val id: UUID, val material: Material, val customModelID: Int): Resource()
+class AnimatedModelResource(val default: BBModelConverter.RenderedAnimationStack, val animations: List<BBModelConverter.RenderedAnimation>): Resource()
 class ResourcePackFinalizedEvent(val path: String, val hash: String): Event() {
     companion object {
         @JvmStatic
