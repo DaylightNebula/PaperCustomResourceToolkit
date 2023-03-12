@@ -2,6 +2,10 @@ package daylightnebula.papercustomresourcetoolkit.packer
 
 import org.bukkit.Material
 import org.bukkit.util.Vector
+import org.joml.Matrix4f
+import org.joml.Quaternionf
+import org.joml.Quaternionfc
+import org.joml.Vector3f
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.IllegalArgumentException
@@ -33,17 +37,78 @@ object BBModelConverter {
         val animations = json.getJSONArray("animations").map { convertToPreRenderAnimation(it as JSONObject) }
 
         // render and return animations
+        val tracker = hashMapOf<RenderedAnimationPosition, Pair<Material, Int>>()
         return AnimatedModelResource(
             RenderedAnimationStack(elements.map { pair -> allocate(pair.value) }),
-            animations.map { RenderedAnimation(it.name, renderAnimation(boneStacks, it)) }
+            animations.map { RenderedAnimation(it.name, renderAnimation(boneStacks, it) { uuid, position, rotation, scale ->
+                val pos = RenderedAnimationPosition(uuid, position, rotation, scale)
+                if (tracker.containsKey(pos)) tracker[pos]!!
+                else {
+                    val new = allocate(elements[uuid]!!) // TODO use position rotation and scale
+                    tracker[pos] = new
+                    new
+                }
+            })}
         )
     }
+    data class RenderedAnimationPosition(val uuid: UUID, val position: Vector, val rotation: Vector, val scale: Vector)
 
     // post render animation stuff
     data class RenderedAnimation(val name: String, val stacks: List<RenderedAnimationStack>)
     data class RenderedAnimationStack(val stack: List<Pair<Material, Int>>)
-    private fun renderAnimation(boneStacks: List<BoneAnimatedComponent>, animation: PreRenderAnimation): List<RenderedAnimationStack> {
-        return listOf() //RenderedAnimationStack(listOf()) // TODO
+    private fun renderAnimation(
+        boneStacks: List<BoneAnimatedComponent>,
+        animation: PreRenderAnimation,
+        create: (uuid: UUID, position: Vector, rotation: Vector, scale: Vector) -> Pair<Material, Int>
+    ): List<RenderedAnimationStack> {
+        // loop through every frame, creating a new stack for each
+        return (0 .. (animation.length * 20).toInt()).map { tick ->
+            RenderedAnimationStack(
+                boneStacks.map {
+                    renderBoneStack(it, animation, tick / 20.0, create)
+                }.flatten()
+            )
+        }
+    }
+    private fun renderBoneStack(
+        boneStack: BoneAnimatedComponent,
+        animation: PreRenderAnimation,
+        time: Double,
+        create: (uuid: UUID, position: Vector, rotation: Vector, scale: Vector) -> Pair<Material, Int>
+    ): List<Pair<Material, Int>> {
+        return recursiveRenderBoneStack(boneStack, animation, time, create, Matrix4f().identity())
+    }
+    private fun recursiveRenderBoneStack(
+        boneStack: BoneAnimatedComponent,
+        animation: PreRenderAnimation,
+        time: Double,
+        create: (uuid: UUID, position: Vector, rotation: Vector, scale: Vector) -> Pair<Material, Int>,
+        matrix: Matrix4f
+    ): List<Pair<Material, Int>> {
+
+        // modify matrix by rotating around the origin and then adding the position
+//        matrix.rotateAround(
+//            Quaternionf().rotateXYZ(
+//
+//            ),
+//            boneStack.origin.x.toFloat(),
+//            boneStack.origin.y.toFloat(),
+//            boneStack.origin.z.toFloat()
+//        )
+
+        // loop through all children, returning the results of either create or another layer of recursion
+        return boneStack.children.map {
+            if (it is BoneAnimatedComponent)
+                recursiveRenderBoneStack(it, animation, time, create, matrix.clone() as Matrix4f)
+            else if (it is ElementAnimatedComponent)
+                listOf(create(
+                    it.uuid,
+                    jomlVectorToVector(matrix.getTranslation(Vector3f())),
+                    jomlVectorToVector(matrix.getNormalizedRotation(Quaternionf()).getEulerAnglesXYZ(Vector3f())),
+                    jomlVectorToVector(matrix.getScale(Vector3f()))
+                ))
+            else throw IllegalArgumentException("????????")
+        }.flatten()
     }
 
     // pre render animation stuffs
@@ -115,9 +180,9 @@ object BBModelConverter {
     }
 
     // bone stuff
-    abstract class AnimatedComponent(val uuid: UUID)
-    class BoneAnimatedComponent(uuid: UUID, val origin: Vector, val children: List<AnimatedComponent>): AnimatedComponent(uuid)
-    class ElementAnimatedComponent(uuid: UUID, val element: JSONObject): AnimatedComponent(uuid)
+    abstract class AnimatedComponent(val uuid: UUID, val origin: Vector)
+    class BoneAnimatedComponent(uuid: UUID, origin: Vector, val children: List<AnimatedComponent>): AnimatedComponent(uuid, origin)
+    class ElementAnimatedComponent(uuid: UUID, origin: Vector, val element: JSONObject): AnimatedComponent(uuid, origin)
     private fun createBoneStack(root: JSONObject, elements: HashMap<UUID, JSONObject>): BoneAnimatedComponent {
         val origin = root.getJSONArray("origin")
         return BoneAnimatedComponent(
@@ -126,7 +191,8 @@ object BBModelConverter {
             root.getJSONArray("children").map {
                 if (it is String) {
                     val uuid = UUID.fromString(it)
-                    ElementAnimatedComponent(uuid, elements[uuid]!!)
+                    val eJson = elements[uuid]!!
+                    ElementAnimatedComponent(uuid, if (eJson.has("origin")) jsonArrayToVector(eJson.getJSONArray("origin")) else Vector(0.0, 0.0, 0.0), elements[uuid]!!)
                 } else if (it is JSONObject)
                     createBoneStack(it, elements)
                 else
@@ -203,4 +269,12 @@ object BBModelConverter {
             } else -1
         }.toTypedArray()
     }
+    private fun jsonArrayToVector(arr: JSONArray): Vector {
+        return Vector(
+            handlePossibleStringInDoubleConversion(arr.get(0)),
+            handlePossibleStringInDoubleConversion(arr.get(1)),
+            handlePossibleStringInDoubleConversion(arr.get(2)),
+        )
+    }
+    private fun jomlVectorToVector(vec: Vector3f): Vector = Vector(vec.x.toDouble(), vec.y.toDouble(), vec.z.toDouble())
 }

@@ -29,6 +29,9 @@ dependencies {
 
     // json stuff
     implementation "org.json:json:20230227"
+
+    // math stuff
+    implementation "org.joml:joml:1.10.3"
 }
 
 def targetJavaVersion = 19

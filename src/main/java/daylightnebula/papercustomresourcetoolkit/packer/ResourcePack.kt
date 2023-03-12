@@ -61,7 +61,7 @@ object ResourcePack {
             blockFolder.mkdirs()
 
             // create meta file
-            metaFile.writeText(packJson.toString(1))
+            metaFile.writeText(packJson.toString(0))
         }
     }
 
@@ -153,6 +153,7 @@ object ResourcePack {
                     Bukkit.getPluginManager().callEvent(ResourcePackFinalizedEvent("", ""))
                 }
             )
+        println("Pack finalized")
     }
 }
 abstract class Resource

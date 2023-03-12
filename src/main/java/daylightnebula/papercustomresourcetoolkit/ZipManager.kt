@@ -22,7 +22,6 @@ object ZipManager {
                     FileInputStream(f).use { fi ->
                         BufferedInputStream(fi).use { origin ->
                             val path = parentDirPath + f.name
-                            println("Adding file: $path")
                             val entry = ZipEntry(path)
                             entry.time = f.lastModified()
                             entry.size = f.length()

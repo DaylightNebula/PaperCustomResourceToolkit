@@ -17,6 +17,6 @@ object AtlasManager {
 
     fun init() {
         atlasesFolder.mkdirs()
-        File(atlasesFolder, "blocks.json").writeText(atlasJson.toString(1))
+        File(atlasesFolder, "blocks.json").writeText(atlasJson.toString(0))
     }
 }

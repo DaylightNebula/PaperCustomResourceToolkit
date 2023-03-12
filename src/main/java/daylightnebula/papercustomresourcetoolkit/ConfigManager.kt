@@ -18,7 +18,7 @@ object ConfigManager {
     fun save() {
         // save config, creating the file and parent folders
         if (!configFile.parentFile.exists()) configFile.parentFile.mkdirs()
-        configFile.writeText(configJson.toString(1))
+        configFile.writeText(configJson.toString(0))
         println("Saved config to ${configFile.absoluteFile}")
     }
 
