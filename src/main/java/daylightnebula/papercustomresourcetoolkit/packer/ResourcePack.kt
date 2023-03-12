@@ -61,7 +61,7 @@ object ResourcePack {
             blockFolder.mkdirs()
 
             // create meta file
-            metaFile.writeText(packJson.toString(0))
+            metaFile.writeText(packJson.toString(1))
         }
     }
 

@@ -27,7 +27,7 @@ object ItemAllocator {
         val modelID = currentModelID++
         val modelData = getCleanCustomModelID()
         val file = File(ResourcePack.itemFolder, "$modelID.json")
-        file.writeText(model.toString(0))
+        file.writeText(model.toString(1))
         currentItemJson.getJSONArray("overrides").put(
             JSONObject()
                 .put(
@@ -69,7 +69,7 @@ object ItemAllocator {
     private fun saveCurrentItemJson() {
         val material = Material.valueOf(itemList.getString(currentItem))
         val file = File(ResourcePack.itemFolder, "${material.name.lowercase()}.json")
-        file.writeText(currentItemJson.toString(0))
+        file.writeText(currentItemJson.toString(1))
     }
 
     fun cleanup() {
