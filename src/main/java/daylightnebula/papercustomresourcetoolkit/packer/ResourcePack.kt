@@ -32,7 +32,7 @@ object ResourcePack {
     private val packFolder = File("ResourcePack")
     private val assetsFolder = File(packFolder, "assets")
     private val namespaceFolder = File(assetsFolder, namespace)
-    private val texturesFolder = File(namespaceFolder, "textures/$namespace")
+    val texturesFolder = File(namespaceFolder, "textures/$namespace")
     val minecraftFolder = File(assetsFolder, "minecraft")
     private val modelsFolder = File(minecraftFolder, "models")
     val itemFolder = File(modelsFolder, "item")
@@ -74,18 +74,17 @@ object ResourcePack {
         }
     }
 
-    private var currentTextureID = 0
     private fun addPNGTexture(file: File) {
         // get new texture id
-        val texID = currentTextureID++
+        val texID = TextureAllocator.saveTexture(file)
 
-        // copy texture into the pack
-        val target = File(texturesFolder, "$texID.png")
-        file.copyTo(target, overwrite = true)
+        val hasOptions = file.nameWithoutExtension.contains("-")
+        val parentType = if (hasOptions) file.nameWithoutExtension.split("-", limit = 2).last() else "generated"
+        val textureName = if (hasOptions) file.nameWithoutExtension.split("-", limit = 2).first() else file.nameWithoutExtension
 
         // generate model for the texture
         val model = JSONObject()
-            .put("parent", "minecraft:item/generated")
+            .put("parent", "minecraft:item/$parentType")
             .put(
                 "textures",
                 JSONObject()
@@ -96,11 +95,24 @@ object ResourcePack {
         val modelData = ItemAllocator.addCustomModel(model)
 
         // save resource
-        resources.put(file.nameWithoutExtension, Resource(modelData.first, modelData.second))
+        resources[textureName] = ImageResource(modelData.first, modelData.second)
     }
 
     private fun addBBModel(file: File) {
-        TODO("BBModels are not supported yet!")
+        val json = JSONObject(file.readText())
+
+        if (json.has("animations")) {
+            val model = BBModelConverter.convertAnimatedModel(json)
+            val elements = model.map {
+                val data = ItemAllocator.addCustomModel(it)
+                StaticModelResource(data.first, data.second)
+            }
+            resources[file.nameWithoutExtension] = AnimatedModelResource(elements)
+        } else {
+            val model = BBModelConverter.convertStatic(json)
+            val modelData = ItemAllocator.addCustomModel(model)
+            resources[file.nameWithoutExtension] = StaticModelResource(modelData.first, modelData.second)
+        }
     }
 
     internal fun finalizePack() {
@@ -138,7 +150,10 @@ object ResourcePack {
             )
     }
 }
-data class Resource(val itemType: Material, val data: Int)
+abstract class Resource
+class ImageResource(val material: Material, val customModelID: Int): Resource()
+class StaticModelResource(val material: Material, val customModelID: Int): Resource()
+class AnimatedModelResource(val parts: List<StaticModelResource>): Resource()
 class ResourcePackFinalizedEvent(val path: String, val hash: String): Event() {
     companion object {
         @JvmStatic
