@@ -6,7 +6,7 @@ import java.io.File
 
 object AtlasManager {
 
-    val atlasesFolder = File(ResourcePack.minecraftFolder, "atlases")
+    private val atlasesFolder = File(ResourcePack.minecraftFolder, "atlases")
 //    val atlasJson = JSONObject()
 //        .put("sources", JSONArray().put(
 //            JSONObject()

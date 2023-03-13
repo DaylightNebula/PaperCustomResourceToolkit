@@ -88,6 +88,12 @@ object ResourcePack {
         }
     }
 
+    fun addCustomResource(path: String, content: String) {
+        val file = File(assetsFolder, path)
+        file.parentFile.mkdirs()
+        file.writeText(content)
+    }
+
     private fun addPNGTexture(file: File) {
         // get new texture id
         val texID = TextureAllocator.saveTexture(file)

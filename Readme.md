@@ -18,11 +18,12 @@ Todolist:
     - [x] Generate mcmeta automatically
   - [x] Automatic export to .minecraft folder if requested
   - [x] PNG textures converted to models
-  - [ ] BBModels should be converted to models
-    - [ ] Animation support
+  - [x] Model Engine Support
+  - [x] Option to add custom resources to any path in resource pack
   - [ ] Fonts
     - [ ] All png textures should have a font option (for GUIs and chat)
     - [ ] Easy way of adding custom fonts without overriding base text
+    - [ ] On load, offsets and dimensions can be registered for any image being loaded to font
 - [ ] Custom items (maybe able to steal from rpg toolkit)
   - [ ] Load from json files
   - [ ] Optionally use custom texture or model
