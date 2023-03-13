@@ -1,9 +1,6 @@
 package daylightnebula.papercustomresourcetoolkit
 
-import daylightnebula.papercustomresourcetoolkit.packer.CreateAnimatedModelCommand
-import daylightnebula.papercustomresourcetoolkit.packer.RemoveAnimatedModelsCommand
 import daylightnebula.papercustomresourcetoolkit.packer.ResourcePack
-import daylightnebula.papercustomresourcetoolkit.packer.activeTestStands
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
@@ -30,11 +27,7 @@ class PaperCustomResourceToolkit : JavaPlugin() {
 
     override fun onEnable() {
         // run finalize packer
-        Bukkit.getScheduler().runTaskAsynchronously(this, Runnable { ResourcePack.finalizePack() })
-
-        // commands
-        this.getCommand("createanimatedmodel")?.setExecutor(CreateAnimatedModelCommand())
-        this.getCommand("removeanimatedmodels")?.setExecutor(RemoveAnimatedModelsCommand())
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, Runnable { ResourcePack.finalizePack() }, 0L)
 
         // update loop
         updateTask = Bukkit.getScheduler().runTaskTimer(this, Runnable { update() }, 2L, 1L)
@@ -46,10 +39,6 @@ class PaperCustomResourceToolkit : JavaPlugin() {
 
         // save config with any changes
         ConfigManager.save()
-        activeTestStands.forEach {
-            it.key.cancel()
-            it.value.forEach { ass -> ass.remove() }
-        }
     }
 
     private lateinit var updateTask: BukkitTask

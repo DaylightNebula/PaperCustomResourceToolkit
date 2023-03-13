@@ -47,7 +47,6 @@ object ResourcePack {
     internal fun init() {
         // initialize sub system
         ItemAllocator.init()
-        AtlasManager.init()
 
         // get should generate config value
         shouldGenerate = ConfigManager.getValueFromJson("shouldGenerateResourcePack", true)
@@ -117,9 +116,9 @@ object ResourcePack {
         val json = JSONObject(file.readText())
 
         if (json.has("animations")) {
-            resources[file.nameWithoutExtension] = BBModelConverter.convertAnimatedModelFromBBModel(json) {
-                ItemAllocator.addCustomModel(it)
-            }
+            val target = File(PaperCustomResourceToolkit.plugin.dataFolder, "../ModelEngine/blueprints/${file.name}")
+            target.parentFile.mkdir()
+            file.copyTo(target, overwrite = true)
         } else {
             val (uuid, model) = BBModelConverter.convertStatic(json)
             val modelData = ItemAllocator.addCustomModel(model)
@@ -132,6 +131,13 @@ object ResourcePack {
         if (shouldGenerate) {
             // finalize sub systems
             ItemAllocator.cleanup()
+
+            // copy model instance assets
+            val meAssets = File(PaperCustomResourceToolkit.plugin.dataFolder, "../ModelEngine/resource pack/assets")
+            meAssets.copyRecursively(assetsFolder, overwrite = true)
+
+            // finalize atlas
+            AtlasManager.init()
 
             // zip resource pack
             packFile = File("ResourcePack.zip")

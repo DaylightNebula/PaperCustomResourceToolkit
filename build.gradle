@@ -17,6 +17,7 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven { url = "https://mvn.lumine.io/repository/maven-public/" }
 }
 
 dependencies {
@@ -32,6 +33,7 @@ dependencies {
 
     // math stuff
     implementation "org.joml:joml:1.10.3"
+    implementation "com.ticxo.modelengine:api:R3.1.5"
 }
 
 def targetJavaVersion = 19
