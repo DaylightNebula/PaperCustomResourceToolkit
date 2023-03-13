@@ -56,13 +56,20 @@ object ResourcePack {
         // check if we should generate
         if (shouldGenerate) {
             // create folders
-            texturesFolder.mkdirs()
-            itemFolder.mkdirs()
-            blockFolder.mkdirs()
+            makeSureExistsAndClear(texturesFolder)
+            makeSureExistsAndClear(itemFolder)
+            makeSureExistsAndClear(blockFolder)
 
             // create meta file
             metaFile.writeText(packJson.toString(1))
         }
+    }
+
+    private fun makeSureExistsAndClear(file: File) {
+        if (file.exists()) {
+            file.listFiles()?.forEach { it.deleteRecursively() }
+        } else
+            file.mkdirs()
     }
 
     fun addAssetsFolder(folder: File) {

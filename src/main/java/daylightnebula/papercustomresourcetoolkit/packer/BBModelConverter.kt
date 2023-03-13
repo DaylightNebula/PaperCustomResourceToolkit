@@ -1,17 +1,15 @@
 package daylightnebula.papercustomresourcetoolkit.packer
 
-import org.bukkit.Axis
 import org.bukkit.Material
 import org.bukkit.util.Vector
 import org.joml.Matrix4f
 import org.joml.Quaternionf
-import org.joml.Quaternionfc
 import org.joml.Vector3f
 import org.json.JSONArray
 import org.json.JSONObject
-import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.util.*
+import kotlin.IllegalArgumentException
 import kotlin.math.absoluteValue
 
 object BBModelConverter {
@@ -32,15 +30,6 @@ object BBModelConverter {
         )
     }
 
-    private fun printElementRecursively(component: AnimatedComponent, tabs: Int = 0) {
-        (0 .. tabs).forEach { print("    ") }
-        println(" - $component")
-        if (component is BoneAnimatedComponent)
-            for (child in component.children) {
-                printElementRecursively(child, tabs + 1)
-            }
-    }
-
     fun convertAnimatedModelFromBBModel(json: JSONObject, allocate: (json: JSONObject) -> Pair<Material, Int>): AnimatedModelResource {
         // get converted elements and bone stack
         val resolution = json.getJSONObject("resolution")
@@ -49,85 +38,151 @@ object BBModelConverter {
         val boneStacks = json.getJSONArray("outliner").map { createBoneStack(it as JSONObject, elements) }
         val animations = json.getJSONArray("animations").map { convertToPreRenderAnimation(it as JSONObject) }
 
+        // create final animations
+        val map = hashMapOf<String, Pair<Material, Int>>()
+        val finalAnimations = animations.map { RenderedAnimation(it.name, renderAnimation(boneStacks, it) { element, position, rotation ->
+            val id = "${element.uuid}_${position.x}_${position.y}_${position.z}_${rotation.x}_${rotation.y}_${rotation.z}"
+            val existing = map[id]
+            if (existing != null)
+                existing
+            else {
+                val json = allocate(element.render(resolution, textures, position, rotation))
+                map[id] = json
+                json
+            }
+        })}
+
         // render and return animations
-        val tracker = hashMapOf<RenderedAnimationPosition, Pair<Material, Int>>()
         return AnimatedModelResource(
             RenderedAnimationStack(boneStacks.map { it.render(resolution, textures, allocate) }.flatten()),
-            listOf()
-//            animations.map { RenderedAnimation(it.name, renderAnimation(boneStacks, it) { uuid, position, rotation, scale ->
-//                val pos = RenderedAnimationPosition(uuid, position, rotation, scale)
-//                if (tracker.containsKey(pos)) tracker[pos]!!
-//                else {
-//                    val new = allocate(elements[uuid]!!) // TODO use position rotation and scale
-//                    tracker[pos] = new
-//                    new
-//                }
-//            })}
+            finalAnimations
         )
     }
-    data class RenderedAnimationPosition(val uuid: UUID, val position: Vector, val rotation: Vector, val scale: Vector)
 
     // post render animation stuff
-    data class RenderedAnimation(val name: String, val stacks: List<RenderedAnimationStack>)
+    data class RenderedAnimation(val name: String, val frames: RenderedAnimationFrames)
     data class RenderedAnimationStack(val stack: List<Pair<Material, Int>>)
-//    private fun renderAnimation(
-//        boneStacks: List<BoneAnimatedComponent>,
-//        animation: PreRenderAnimation,
-//        create: (uuid: UUID, position: Vector, rotation: Vector, scale: Vector) -> Pair<Material, Int>
-//    ): List<RenderedAnimationStack> {
-//        // loop through every frame, creating a new stack for each
-//        return (0 .. (animation.length * 20).toInt()).map { tick ->
-//            RenderedAnimationStack(
-//                boneStacks.map {
-//                    renderBoneStack(it, animation, tick / 20.0, create)
-//                }.flatten()
-//            )
-//        }
-//    }
-//    private fun renderBoneStack(
-//        boneStack: BoneAnimatedComponent,
-//        animation: PreRenderAnimation,
-//        time: Double,
-//        create: (uuid: UUID, position: Vector, rotation: Vector, scale: Vector) -> Pair<Material, Int>
-//    ): List<Pair<Material, Int>> {
-//        return recursiveRenderBoneStack(boneStack, animation, time, create, Matrix4f().identity())
-//    }
-//    private fun recursiveRenderBoneStack(
-//        boneStack: BoneAnimatedComponent,
-//        animation: PreRenderAnimation,
-//        time: Double,
-//        create: (uuid: UUID, position: Vector, rotation: Vector, scale: Vector) -> Pair<Material, Int>,
-//        matrix: Matrix4f
-//    ): List<Pair<Material, Int>> {
-//
-//        // modify matrix by rotating around the origin and then adding the position
-////        matrix.rotateAround(
-////            Quaternionf().rotateXYZ(
-////
-////            ),
-////            boneStack.origin.x.toFloat(),
-////            boneStack.origin.y.toFloat(),
-////            boneStack.origin.z.toFloat()
-////        )
-//
-//        // loop through all children, returning the results of either create or another layer of recursion
-//        return boneStack.children.map {
-//            if (it is BoneAnimatedComponent)
-//                recursiveRenderBoneStack(it, animation, time, create, matrix.clone() as Matrix4f)
-//            else if (it is ElementAnimatedComponent)
-//                listOf(create(
-//                    it.uuid,
-//                    jomlVectorToVector(matrix.getTranslation(Vector3f())),
-//                    jomlVectorToVector(matrix.getNormalizedRotation(Quaternionf()).getEulerAnglesXYZ(Vector3f())),
-//                    jomlVectorToVector(matrix.getScale(Vector3f()))
-//                ))
-//            else throw IllegalArgumentException("????????")
-//        }.flatten()
-//    }
+    data class RenderedAnimationFrames(val frames: List<RenderedAnimationStack>)
+    private fun renderAnimation(
+        boneStacks: List<BoneAnimatedComponent>,
+        animation: PreRenderAnimation,
+        create: (element: ElementAnimatedComponent, position: Vector3f, rotation: Vector3f) -> Pair<Material, Int>
+    ): RenderedAnimationFrames {
+        // loop through every frame, creating a new stack for each
+        val numFrames = (animation.length * 20.0).toInt()
+        val frames = RenderedAnimationFrames(
+            (0 .. numFrames).map { tick ->
+                RenderedAnimationStack(
+                    boneStacks.map {
+                        renderBoneStack(it, animation, tick / 20.0, create)
+                    }.flatten()
+                )
+            }
+        )
+        return frames
+    }
+    private fun renderBoneStack(
+        boneStack: BoneAnimatedComponent,
+        animation: PreRenderAnimation,
+        time: Double,
+        create: (element: ElementAnimatedComponent, position: Vector3f, rotation: Vector3f) -> Pair<Material, Int>
+    ): List<Pair<Material, Int>> {
+        return renderBoneStackRecursive(boneStack, animation, Matrix4f().identity(), time, create)
+    }
+    private fun renderBoneStackRecursive(
+        boneStack: BoneAnimatedComponent,
+        animation: PreRenderAnimation,
+        matrix: Matrix4f,
+        time: Double,
+        create: (element: ElementAnimatedComponent, position: Vector3f, rotation: Vector3f) -> Pair<Material, Int>
+    ): List<Pair<Material, Int>> {
+        val output = mutableListOf<Pair<Material, Int>>()
+        matrix.set(boneStack.children.firstOrNull { it is ElementAnimatedComponent }?.let { e ->
+            val element = e as ElementAnimatedComponent
+
+            // apply translation
+            val translation = (animation.animators[boneStack.uuid] ?: return listOf()).getPositionAtTime(time)
+            matrix.translate(translation.x.toFloat(), translation.y.toFloat(), translation.z.toFloat())
+
+            // rotate around origin
+//            val rotation = (animation.animators[boneStack.uuid] ?: return listOf()).getRotationAtTime(time)
+//            matrix.rotateAround(Quaternionf().rotateXYZ(
+//                (-rotation.x + masterPart.rotation.x).toFloat() * 0.0174532f,
+//                (-rotation.y + masterPart.rotation.y).toFloat() * 0.0174532f,
+//                (-rotation.z + masterPart.rotation.z).toFloat() * 0.0174532f
+//            ), masterPart.origin.x.toFloat() * 0.125f, masterPart.origin.y.toFloat() * 0.125f, masterPart.origin.z.toFloat() * 0.125f)
+
+            // add origin to matrix so rotation is correct
+            val scl = 0.125f
+            matrix.translate(boneStack.origin.x.toFloat() * scl, boneStack.origin.y.toFloat() * scl, boneStack.origin.z.toFloat() * scl)
+
+            // get translation (multiplication cause block bench weird)
+            val totalTranslation = matrix.getTranslation(Vector3f()).mul(-1f, 1f, -1f)
+
+            // apply rotation
+//            val rotation = (animation.animators[boneStack.uuid] ?: return listOf()).getRotationAtTime(time)
+//            matrix.rotateX((-rotation.x /*+ boneStack.rotation.x*/).toFloat() * 0.0174532f)
+//            matrix.rotateY((-rotation.y /*+ boneStack.rotation.y*/).toFloat() * 0.0174532f)
+//            matrix.rotateZ((rotation.z /*+ boneStack.rotation.z*/).toFloat() * 0.0174532f)
+            val totalRotation = matrix.getEulerAnglesXYZ(Vector3f())
+
+            // remove origin to make matrix correct again
+            matrix.translate(-boneStack.origin.x.toFloat() * scl, -boneStack.origin.y.toFloat() * scl, -boneStack.origin.z.toFloat() * scl)
+
+            output.add(create(element, totalTranslation, totalRotation))
+            matrix
+        })
+
+        // loop through children, if bone run this function on it, otherwise, render its json with given translation
+        boneStack.children.forEach {
+            if (it is BoneAnimatedComponent)
+                output.addAll(renderBoneStackRecursive(it, animation, matrix.clone() as Matrix4f, time, create))
+            else if (it is ElementAnimatedComponent) {}
+            else
+                throw IllegalArgumentException("???????????")
+        }
+        return output
+    }
 
     // pre render animation stuffs
     data class PreRenderAnimation(val uuid: UUID, val name: String, val loop: Boolean, val length: Double, val animators: HashMap<UUID, PreRenderAnimator>)
-    data class PreRenderAnimator(val uuid: UUID, val positionKeyFrames: List<PreRenderKeyFrame>, val rotationKeyFrames: List<PreRenderKeyFrame>, val scaleKeyFrames: List<PreRenderKeyFrame>)
+    data class PreRenderAnimator(val uuid: UUID, val positionKeyFrames: List<PreRenderKeyFrame>, val rotationKeyFrames: List<PreRenderKeyFrame>, val scaleKeyFrames: List<PreRenderKeyFrame>) {
+        fun getPositionAtTime(time: Double): Vector {
+            // try to get index of the last frame with a timestamp before the given timestamp, return if nothing found
+            val firstFrameIdx = positionKeyFrames.indexOfLast { time < it.time }
+            if (firstFrameIdx == -1) return Vector(0.0, 0.0, 0.0)
+
+            // get first frame, return its position if it's the last frame
+            val firstFrame = positionKeyFrames[firstFrameIdx]
+            if (firstFrameIdx >= positionKeyFrames.size - 1) return firstFrame.vec
+
+            // get second frame
+            val secondFrame = positionKeyFrames[firstFrameIdx + 1]
+
+            // interpolate and return result
+            val percent = (time - firstFrame.time) / (secondFrame.time - firstFrame.time)
+            val direction = secondFrame.vec.clone().subtract(firstFrame.vec).multiply(percent)
+            return firstFrame.vec.clone().add(direction)
+        }
+
+        fun getRotationAtTime(time: Double): Vector {
+            // try to get index of the last frame with a timestamp before the given timestamp, return if nothing found
+            val firstFrameIdx = rotationKeyFrames.indexOfLast { time < it.time }
+            if (firstFrameIdx == -1) return Vector(0.0, 0.0, 0.0)
+
+            // get first frame, return its position if it's the last frame
+            val firstFrame = rotationKeyFrames[firstFrameIdx]
+            if (firstFrameIdx >= rotationKeyFrames.size - 1) return firstFrame.vec
+
+            // get second frame
+            val secondFrame = rotationKeyFrames[firstFrameIdx + 1]
+
+            // interpolate and return result
+            val percent = (time - firstFrame.time) / (secondFrame.time - firstFrame.time)
+            val direction = secondFrame.vec.clone().subtract(firstFrame.vec).multiply(percent)
+            return firstFrame.vec.clone().add(direction)
+        }
+    }
     data class PreRenderKeyFrame(val time: Double, val vec: Vector, val isLinear: Boolean)
     private fun convertToPreRenderAnimation(json: JSONObject): PreRenderAnimation {
         // generate animators hash map
@@ -197,27 +252,42 @@ object BBModelConverter {
     abstract class AnimatedComponent {
         abstract fun render(resolution: JSONObject, textures: JSONObject, allocate: (json: JSONObject) -> Pair<Material, Int>): List<Pair<Material, Int>>
     }
-    class BoneAnimatedComponent(uuid: UUID, origin: Vector, val children: List<AnimatedComponent>): AnimatedComponent() {
+    class BoneAnimatedComponent(val uuid: UUID, val origin: Vector, val children: List<AnimatedComponent>): AnimatedComponent() {
         override fun render(resolution: JSONObject, textures: JSONObject, allocate: (json: JSONObject) -> Pair<Material, Int>): List<Pair<Material, Int>> {
             return children.map { it.render(resolution, textures, allocate) }.flatten()
         }
     }
-    class ElementAnimatedComponent(private val elements: List<ModelPart>): AnimatedComponent() {
+    class ElementAnimatedComponent(val uuid: UUID, val elements: List<ModelPart>): AnimatedComponent() {
         override fun render(
             resolution: JSONObject,
             textures: JSONObject,
             allocate: (json: JSONObject) -> Pair<Material, Int>
         ): List<Pair<Material, Int>> {
+            return listOf(allocate(render(resolution, textures, Vector3f(0f, 0f, 0f), Vector3f(0f, 0f, 0f))))
+        }
+
+        fun render(
+            resolution: JSONObject,
+            textures: JSONObject,
+            position: Vector3f,
+            rotation: Vector3f // todo implement rotation
+        ): JSONObject {
             val elementsJson = JSONArray()
             elements.forEach { elementsJson.put(it.toJson(resolution)) }
-            return listOf(
-                allocate(
+            return JSONObject()
+                .put("textures", textures)
+                .put(
+                    "display",
                     JSONObject()
-                        .put("textures", textures)
-                        .put("display", displayJson)
-                        .put("elements", elementsJson)
+                        .put(
+                            "head",
+                            JSONObject()
+                                .put("scale", JSONArray().put(1.6).put(1.6).put(1.6))
+                                .put("translation", JSONArray().put(position.x).put(position.y).put(position.z))
+                                .put("rotation", JSONArray().put(rotation.x * 57.29577f).put(rotation.y * 57.29577f).put(rotation.z * 57.29577f))
+                        )
                 )
-            )
+                .put("elements", elementsJson)
         }
     }
     data class ModelPart(val from: Vector, val to: Vector, val origin: Vector, val rotation: Vector, val faces: JSONObject) {
@@ -285,22 +355,12 @@ object BBModelConverter {
         }
 
         if (modelParts.isNotEmpty())
-            components.add(ElementAnimatedComponent(modelParts))
+            components.add(ElementAnimatedComponent(UUID.randomUUID(), modelParts))
 
         return BoneAnimatedComponent(
             UUID.fromString(root.getString("uuid")),
             Vector(origin.getDouble(0), origin.getDouble(1), origin.getDouble(2)),
             components
-//            root.getJSONArray("children").map {
-//                if (it is String) {
-//                    val uuid = UUID.fromString(it)
-//                    val eJson = elements[uuid]!!
-//                    ElementAnimatedComponent(uuid, if (eJson.has("origin")) jsonArrayToVector(eJson.getJSONArray("origin")) else Vector(0.0, 0.0, 0.0), elements[uuid]!!)
-//                } else if (it is JSONObject)
-//                    createBoneStack(it, elements)
-//                else
-//                    throw IllegalArgumentException("Cannot convert $it to AnimatedComponent")
-//            }
         )
     }
     private fun convertAnimatedModelToParts(json: JSONObject): HashMap<UUID, ModelPart> {

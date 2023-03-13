@@ -46,7 +46,10 @@ class PaperCustomResourceToolkit : JavaPlugin() {
 
         // save config with any changes
         ConfigManager.save()
-        activeTestStands.forEach { it.remove() }
+        activeTestStands.forEach {
+            it.key.cancel()
+            it.value.forEach { ass -> ass.remove() }
+        }
     }
 
     private lateinit var updateTask: BukkitTask
