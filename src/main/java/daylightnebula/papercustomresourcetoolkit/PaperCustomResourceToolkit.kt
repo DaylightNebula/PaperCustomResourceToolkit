@@ -1,5 +1,7 @@
 package daylightnebula.papercustomresourcetoolkit
 
+import daylightnebula.papercustomresourcetoolkit.packer.CreateAnimatedModelCommand
+import daylightnebula.papercustomresourcetoolkit.packer.FontManager
 import daylightnebula.papercustomresourcetoolkit.packer.ResourcePack
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
@@ -23,6 +25,9 @@ class PaperCustomResourceToolkit : JavaPlugin() {
         // initialize packer
         ResourcePack.init()
         ResourcePack.addAssetsFolder(File(dataFolder, "assets"))
+
+        // add some custom stuff
+        FontManager.addTexturedCharacter("sword", "sword-handheld", 7, 8)
     }
 
     override fun onEnable() {

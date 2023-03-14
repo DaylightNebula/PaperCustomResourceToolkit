@@ -35,6 +35,7 @@ object ResourcePack {
     private val namespaceFolder = File(assetsFolder, namespace)
     val texturesFolder = File(namespaceFolder, "textures/$namespace")
     val minecraftFolder = File(assetsFolder, "minecraft")
+    val fontFolder = File(minecraftFolder, "font")
     private val modelsFolder = File(minecraftFolder, "models")
     val itemFolder = File(modelsFolder, "item")
     private val blockFolder = File(modelsFolder, "block")
@@ -47,6 +48,7 @@ object ResourcePack {
     internal fun init() {
         // initialize sub system
         ItemAllocator.init()
+        FontManager.init()
 
         // get should generate config value
         shouldGenerate = ConfigManager.getValueFromJson("shouldGenerateResourcePack", true)
@@ -58,6 +60,7 @@ object ResourcePack {
             makeSureExistsAndClear(texturesFolder)
             makeSureExistsAndClear(itemFolder)
             makeSureExistsAndClear(blockFolder)
+            makeSureExistsAndClear(fontFolder)
 
             // create meta file
             metaFile.writeText(packJson.toString(1))
@@ -144,6 +147,7 @@ object ResourcePack {
 
             // finalize atlas
             AtlasManager.init()
+            FontManager.finalize()
 
             // zip resource pack
             packFile = File("ResourcePack.zip")

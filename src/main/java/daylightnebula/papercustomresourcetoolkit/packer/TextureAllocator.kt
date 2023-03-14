@@ -8,6 +8,11 @@ import javax.imageio.ImageIO
 
 object TextureAllocator {
     private var curTextureID = 0
+    private val textureMap = hashMapOf<String, Int>()
+
+    fun getTextureID(texture: String): Int? {
+        return textureMap[texture]
+    }
 
     fun saveTexture(texString: String): Int {
         // get image bytes by decoding base 64, skipping the header
@@ -18,6 +23,9 @@ object TextureAllocator {
     }
 
     fun saveTexture(file: File): Int {
+        val name = file.nameWithoutExtension
+        println("Added texture named $name")
+
         // get a new texture id
         val texID = curTextureID++
 
@@ -26,6 +34,9 @@ object TextureAllocator {
 
         // copy file to the target
         file.copyTo(target, overwrite = true)
+
+        // save to texture map
+        textureMap[name] = texID
 
         // return texture id
         return texID

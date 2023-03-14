@@ -20,10 +20,11 @@ Todolist:
   - [x] PNG textures converted to models
   - [x] Model Engine Support
   - [x] Option to add custom resources to any path in resource pack
-  - [ ] Fonts
-    - [ ] All png textures should have a font option (for GUIs and chat)
-    - [ ] Easy way of adding custom fonts without overriding base text
-    - [ ] On load, offsets and dimensions can be registered for any image being loaded to font
+  - [x] Fonts
+    - [x] All png textures should have a font option (for GUIs and chat)
+    - [x] Easy way of adding custom fonts without overriding base text
+    - [x] On load, offsets and dimensions can be registered for any image being loaded to font
+  - [ ] Load everything from .json files if we are not generating anything
 - [ ] Custom items (maybe able to steal from rpg toolkit)
   - [ ] Load from json files
   - [ ] Optionally use custom texture or model
