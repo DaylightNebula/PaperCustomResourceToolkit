@@ -13,10 +13,8 @@ import org.bukkit.scheduler.BukkitTask
 val activeTestStands = hashMapOf<BukkitTask, List<ArmorStand>>()
 class CreateAnimatedModelCommand: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
-        FontManager.fonts.forEach {
-            val send = it.value.offset.toChar().toString()
-            println("SEND $send")
-            sender.sendMessage(it.value.offset.toChar().toString())
+        ResourcePack.getAllResourcesOfType(ResourceType.TEXT_IMAGE)?.forEach {
+            sender.sendMessage("Text Image Resource named ${it.name} = ${(it as TextImageResource).offset.toChar()}")
         }
 
 //        if (args == null || args.isEmpty()) {

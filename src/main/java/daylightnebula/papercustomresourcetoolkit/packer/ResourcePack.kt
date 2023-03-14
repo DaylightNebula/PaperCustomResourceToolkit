@@ -12,6 +12,7 @@ import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.*
+import kotlin.collections.HashMap
 
 object ResourcePack {
 
@@ -28,7 +29,13 @@ object ResourcePack {
     private var shouldGenerate = true
     private var passToMinecraft = true
 
-    private val resources = hashMapOf<String, Resource>()
+    private val resources = hashMapOf<ResourceType<*>, HashMap<String, Resource>>().apply {
+        this[ResourceType.IMAGE] = hashMapOf()
+        this[ResourceType.STATIC_MODEL] = hashMapOf()
+        this[ResourceType.ANIMATED_MODEL] = hashMapOf()
+        this[ResourceType.TEXT_IMAGE] = hashMapOf()
+        this[ResourceType.FONT] = hashMapOf()
+    }
     const val namespace = "custom_resource_toolkit"
     private val packFolder = File("ResourcePack")
     private val assetsFolder = File(packFolder, "assets")
@@ -41,8 +48,16 @@ object ResourcePack {
     private val blockFolder = File(modelsFolder, "block")
     private val metaFile = File(packFolder, "pack.mcmeta")
 
-    fun getResource(key: String): Resource? {
-        return resources[key]
+    fun getResource(type: ResourceType<*>, key: String): Resource? {
+        return resources[type]?.let { it[key] }
+    }
+
+    fun getAllResourcesOfType(type: ResourceType<*>): Collection<Resource>? {
+        return resources[type]?.values
+    }
+
+    internal fun addResource(type: ResourceType<*>, key: String, value: Resource) {
+        resources[type]?.let { it[key] = value }
     }
 
     internal fun init() {
@@ -118,7 +133,7 @@ object ResourcePack {
         val modelData = ItemAllocator.addCustomModel(model)
 
         // save resource
-        resources[textureName] = ImageResource(modelData.first, modelData.second)
+        addResource(ResourceType.IMAGE, file.nameWithoutExtension, ImageResource(file.nameWithoutExtension, modelData.first, modelData.second))
     }
 
     private fun addBBModel(file: File) {
@@ -128,10 +143,11 @@ object ResourcePack {
             val target = File(PaperCustomResourceToolkit.plugin.dataFolder, "../ModelEngine/blueprints/${file.name}")
             target.parentFile.mkdir()
             file.copyTo(target, overwrite = true)
+            addResource(ResourceType.ANIMATED_MODEL, file.nameWithoutExtension, AnimatedModelResource(file.nameWithoutExtension, ))
         } else {
             val (uuid, model) = BBModelConverter.convertStatic(json)
             val modelData = ItemAllocator.addCustomModel(model)
-            resources[file.nameWithoutExtension] = StaticModelResource(uuid, modelData.first, modelData.second)
+            addResource(ResourceType.STATIC_MODEL, file.nameWithoutExtension, StaticModelResource(file.nameWithoutExtension, uuid, modelData.first, modelData.second))
         }
     }
 
@@ -179,10 +195,12 @@ object ResourcePack {
         println("Pack finalized")
     }
 }
-abstract class Resource
-class ImageResource(val material: Material, val customModelID: Int): Resource()
-class StaticModelResource(val id: UUID, val material: Material, val customModelID: Int): Resource()
-class AnimatedModelResource(val default: BBModelConverter.RenderedAnimationStack, val animations: List<BBModelConverter.RenderedAnimation>): Resource()
+abstract class Resource(val name: String)
+class ImageResource(name: String, val material: Material, val customModelID: Int): Resource(name)
+class StaticModelResource(name: String, val id: UUID, val material: Material, val customModelID: Int): Resource(name)
+class AnimatedModelResource(name: String): Resource(name)
+class TextImageResource(name: String, val offset: Int): Resource(name)
+class FontResource(name: String, val firstChar: Int): Resource(name)
 class ResourcePackFinalizedEvent(val path: String, val hash: String): Event() {
     companion object {
         @JvmStatic

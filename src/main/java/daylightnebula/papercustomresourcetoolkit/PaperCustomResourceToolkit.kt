@@ -36,6 +36,8 @@ class PaperCustomResourceToolkit : JavaPlugin() {
 
         // update loop
         updateTask = Bukkit.getScheduler().runTaskTimer(this, Runnable { update() }, 2L, 1L)
+
+        getCommand("createanimatedmodel")?.setExecutor(CreateAnimatedModelCommand())
     }
 
     override fun onDisable() {

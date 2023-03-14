@@ -15,8 +15,6 @@ object FontManager {
     private const val fontImageHeight = 16
     private val fontProviders = JSONArray()
 
-    val fonts = hashMapOf<String, FontResource>()
-
     fun init() {
         // add base font and negative spaces
         addFont("default")
@@ -31,8 +29,8 @@ object FontManager {
         }
 
         // save font before offset changes
-        fonts[name] = FontResource(name, offset)
-        println("Adding texture with ${offset}")
+        ResourcePack.addResource(ResourceType.TEXT_IMAGE, name, TextImageResource(name, offset))
+        println("Adding texture with $offset")
 
         // save everything to a json object then add that object to providers
         fontProviders.put(
@@ -50,7 +48,7 @@ object FontManager {
 
     fun addFont(name: String, ascent: Int = 7, size: Int = 16, oversample: Int = 0) {
         // save font resource (doing this now before offset changes)
-        fonts[name] = FontResource(name, offset)
+        ResourcePack.addResource(ResourceType.FONT, name, FontResource(name, offset))
 
         // generate characters array
         val chars = JSONArray()
@@ -112,4 +110,3 @@ object FontManager {
             "AAEAAQABAAAxNwEBAAEAAAAAAAEAAQABAAAxNwEBAAAAAwAAAAAAAAGZAMwAAAAA" +
             "AAAAAAAAAAAAAAAAAAAAAA=="
 }
-class FontResource(val name: String, val offset: Int)
