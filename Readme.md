@@ -7,7 +7,7 @@ Goals:
  - PNG textures can be used for custom items textures
 
 Todolist:
-- [ ] Resource pack generator
+- [x] Resource pack generator
   - [x] Universal way of storing and saving the models after they are packed
     - [x] Other plugins can easily add folders to load assets from
   - [x] Pack creation should start from onLoad but not finalized until the first tick
@@ -24,7 +24,7 @@ Todolist:
     - [x] All png textures should have a font option (for GUIs and chat)
     - [x] Easy way of adding custom fonts without overriding base text
     - [x] On load, offsets and dimensions can be registered for any image being loaded to font
-  - [ ] Load everything from .json files if we are not generating anything
+  - [x] Load everything from .json files if we are not generating anything
 - [ ] Custom items (maybe able to steal from rpg toolkit)
   - [ ] Load from json files
   - [ ] Optionally use custom texture or model
