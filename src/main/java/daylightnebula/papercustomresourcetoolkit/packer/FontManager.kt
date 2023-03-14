@@ -22,6 +22,8 @@ object FontManager {
     }
 
     fun addTexturedCharacter(name: String, texID: String, ascent: Int, height: Int) {
+        if (!ResourcePack.shouldGenerate) return
+
         val texture = TextureAllocator.getTextureID(texID)
         if (texture == null) {
             System.err.println("No texture with name \"$texID\" created!")

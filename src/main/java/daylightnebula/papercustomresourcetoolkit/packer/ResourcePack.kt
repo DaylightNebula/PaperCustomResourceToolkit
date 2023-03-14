@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.math.BigInteger
@@ -26,7 +27,7 @@ object ResourcePack {
     private lateinit var hash: String
     private lateinit var packFile: File
     private lateinit var packBytes: ByteArray
-    private var shouldGenerate = true
+    internal var shouldGenerate = true
     private var passToMinecraft = true
 
     private val resources = hashMapOf<ResourceType<*>, HashMap<String, Resource>>().apply {
@@ -47,6 +48,7 @@ object ResourcePack {
     val itemFolder = File(modelsFolder, "item")
     private val blockFolder = File(modelsFolder, "block")
     private val metaFile = File(packFolder, "pack.mcmeta")
+    private val configFolder = File(PaperCustomResourceToolkit.plugin.dataFolder, "pack_config")
 
     fun getResource(type: ResourceType<*>, key: String): Resource? {
         return resources[type]?.let { it[key] }
@@ -79,6 +81,46 @@ object ResourcePack {
 
             // create meta file
             metaFile.writeText(packJson.toString(1))
+        } else {
+            // load from save files
+            loadPackConfig()
+        }
+    }
+
+    private fun savePackConfig() {
+        // make config directory
+        configFolder.mkdirs()
+
+        // loop through maps to save
+        resources.forEach { (type, map) ->
+            val arr = JSONArray()
+            map.values.map { type.toJson(it) }.forEach { arr.put(it) }
+            File(configFolder, "${type.name}.json").writeText(arr.toString(4))
+        }
+    }
+
+    private fun loadPackConfig() {
+        // make sure we have a config folder
+        if (!configFolder.exists()) return
+
+        // get all configs and loop through them
+        configFolder.listFiles()?.forEach { file ->
+            println("Attempt to load config ${file.name}")
+            // get config file with type name
+            resources.keys.firstOrNull { it.name == file.nameWithoutExtension }?.let { key ->
+                println("Found key")
+                // get json array
+                val map = resources[key]!!
+                val arr = JSONArray(file.readText())
+
+                // loop through all json objects and load them
+                arr.forEach {
+                    val json = it as? JSONObject ?: return@forEach
+                    val resource = key.fromJson(json)
+                    println("Loaded resource ${resource.name}")
+                    map[resource.name] = resource
+                }
+            }
         }
     }
 
@@ -185,6 +227,8 @@ object ResourcePack {
             if (passToMinecraft)
                 packFolder.copyRecursively(File(System.getenv("APPDATA"), "/.minecraft/resourcepacks/passToMinecraft"), overwrite = true)
 //                File("%APPDATA%/.minecraft/resourcepacks/passToMinecraft.zip").writeBytes(packBytes)
+
+            savePackConfig()
         } else
             Bukkit.getScheduler().runTask(
                 PaperCustomResourceToolkit.plugin,
