@@ -20,8 +20,14 @@ class CustomItem(
     description: String,
     attackDamage: Double = -1.0,
     attackSpeed: Double = -1.0,
-    knockback: Double = -1.0,
+    knockback: Double = -1.0
 ) {
+
+    // listeners
+    val pickupListeners = mutableListOf<(event: CustomItemPickupEvent) -> Unit>()
+    val interactListeners = mutableListOf<(event: CustomItemInteractEvent) -> Unit>()
+    val interactEntityListeners = mutableListOf<(event: CustomItemEntityInteractEvent) -> Unit>()
+    val attackListeners = mutableListOf<(event: CustomItemAttackEntityEvent) -> Unit>()
 
     companion object {
         val items = hashMapOf<String, CustomItem>() // every item will be stored here, each custom item instance is to be treated as a SINGLETON

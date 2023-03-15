@@ -31,15 +31,12 @@ Todolist:
   - [x] Extension functions for item stack
     - [x] Is Custom Item
     - [x] Get Custom Item (return null if not custom item)
-  - [ ] Settings
-    - [ ] All the settings (list in rpg toolkit)
-    - [ ] Custom Durability (0 means no durability and is default)
-    - [ ] Max stack count
+  - [x] Settings
+    - [x] All the settings (list in rpg toolkit)
   - [ ] Events
-    - [ ] Custom Item Interact
-    - [ ] Custom Item Attack
-    - [ ] Custom Item Break
-    - [ ] Custom Item Pickup (include give command)
+    - [x] Custom Item Interact
+    - [x] Custom Item Attack
+    - [x] Custom Item Pickup (include give command)
   - [ ] Crafting recipes
     - [ ] Disable crafting recipes for items with custom model data
     - [ ] New system for creating crafting recipes that contain custom items
@@ -75,3 +72,8 @@ Todolist:
     - [ ] Checkbox (cycle between textures for other options, fire event)
     - [ ] Labels (can be used to display text and have a custom background)
     - [ ] Text buttons (could just add to button, check when this is being implemented)
+- [ ] Custom Armor and Tools
+  - [ ] Extend based custom item
+  - [ ] Allow for durability adjustments
+  - [ ] Mining speed adjustments
+  - [ ] May need to adjust item allocator to allow specific items to be allocated to specific resources

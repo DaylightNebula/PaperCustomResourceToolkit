@@ -2,6 +2,7 @@ package daylightnebula.papercustomresourcetoolkit
 
 import daylightnebula.papercustomresourcetoolkit.items.CustomItem
 import daylightnebula.papercustomresourcetoolkit.items.CustomItemCommand
+import daylightnebula.papercustomresourcetoolkit.items.CustomItemEventListener
 import daylightnebula.papercustomresourcetoolkit.packer.CreateAnimatedModelCommand
 import daylightnebula.papercustomresourcetoolkit.packer.FontManager
 import daylightnebula.papercustomresourcetoolkit.packer.ResourcePack
@@ -40,6 +41,9 @@ class PaperCustomResourceToolkit : JavaPlugin() {
 
         // update loop
         updateTask = Bukkit.getScheduler().runTaskTimer(this, Runnable { update() }, 2L, 1L)
+
+        // register events
+        Bukkit.getPluginManager().registerEvents(CustomItemEventListener(), this)
 
         getCommand("createanimatedmodel")?.setExecutor(CreateAnimatedModelCommand())
         getCommand("getcustomitem")?.setExecutor(CustomItemCommand())

@@ -6,6 +6,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
+import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
@@ -25,7 +26,7 @@ fun item(
     knockback: Double = -1.0
 ): ItemStack {
     // create base item from source material
-    val item = ItemStack(srcMaterial)
+    var item = ItemStack(srcMaterial)
 
     // get a copy of the new items metadata
     val meta = item.itemMeta
@@ -105,12 +106,13 @@ fun Inventory.addItemWithEvent(vararg items: ItemStack) {
         return
     }
 
-    items.forEach {
+    items.forEach { _ ->
         Bukkit.getWorlds().first().dropItem(loc, items.first()) { item -> item.pickupDelay = 0 }
     }
 }
 
 fun ItemStack.isCustomItem(): Boolean {
+    if (this.itemMeta == null) return false
     return this.itemMeta.persistentDataContainer.has(PaperCustomResourceToolkit.customItemReferenceIDKey)
 }
 

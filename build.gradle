@@ -27,6 +27,7 @@ dependencies {
     // mc stuff
     implementation "net.axay:kspigot:1.19.1"
     compileOnly 'io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT'
+    api 'org.spigotmc:spigot:1.19.3-R0.1-SNAPSHOT'
 
     // json stuff
     implementation "org.json:json:20230227"
