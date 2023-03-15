@@ -2,8 +2,10 @@ package daylightnebula.papercustomresourcetoolkit.items
 
 import daylightnebula.papercustomresourcetoolkit.getCustomItem
 import daylightnebula.papercustomresourcetoolkit.isCustomItem
+import net.axay.kspigot.extensions.events.cancel
 import net.axay.kspigot.extensions.events.interactItem
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -14,11 +16,36 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
+import org.bukkit.event.inventory.CraftItemEvent
+import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
 class CustomItemEventListener: Listener {
+
+//    @EventHandler
+//    fun onPrepareItemCraftEvent(event: PrepareItemCraftEvent) {
+//        if (event.inventory.matrix.any { it?.isCustomItem() == true }) {
+//            val recipe = CraftingRecipeUtils.recipes.firstOrNull { it.isRecipeValid(event.inventory) }
+//            if (recipe == null)
+//                event.cancel()
+//            else {
+//                event.inventory.result = recipe.result
+//                event.inventory.matrix.forEach { item -> item?.let { Bukkit.broadcastMessage("AMOUNT ${it.amount}") } }
+//            }
+//        }
+//    }
+
+//    @EventHandler
+//    fun onCraftItemEvent(event: CraftItemEvent) {
+//        if (event.inventory.matrix.any { it?.isCustomItem() == true }) {
+//            Bukkit.broadcastMessage("CRAFT")
+//            CraftingRecipeUtils.recipes.firstOrNull { it.isRecipeValid(event.inventory) } ?: return
+//            event.inventory.clear()
+//        }
+//    }
+
     @EventHandler
     fun onEntityPickupItemEvent(event: EntityPickupItemEvent) {
         // make sure we have a custom item

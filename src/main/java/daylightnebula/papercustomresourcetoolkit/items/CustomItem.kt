@@ -9,6 +9,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.ItemStack
 import org.json.JSONObject
 import java.io.File
 import java.lang.IllegalArgumentException
@@ -72,7 +73,7 @@ class CustomItem(
         json.optDouble("knockback", -1.0)
     )
 
-    private val itemStack = item(
+    val itemStack = item(
         matRef.getMaterial(),
         customModelData = matRef.getCustomModelID(),
         name = name, description = description,

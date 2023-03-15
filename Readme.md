@@ -33,14 +33,11 @@ Todolist:
     - [x] Get Custom Item (return null if not custom item)
   - [x] Settings
     - [x] All the settings (list in rpg toolkit)
-  - [ ] Events
+  - [x] Events
     - [x] Custom Item Interact
     - [x] Custom Item Attack
     - [x] Custom Item Pickup (include give command)
-  - [ ] Crafting recipes
-    - [ ] Disable crafting recipes for items with custom model data
-    - [ ] New system for creating crafting recipes that contain custom items
-    - [ ] Add custom crafting recipes for custom items
+  - [x] Disable crafting recipes for items with custom model data
 - [ ] Custom blocks
   - [ ] Load from json files
   - [ ] Custom item created automatically to be the item representation of this
@@ -77,3 +74,6 @@ Todolist:
   - [ ] Allow for durability adjustments
   - [ ] Mining speed adjustments
   - [ ] May need to adjust item allocator to allow specific items to be allocated to specific resources
+- [ ] Crafting recipes
+  - [ ] New system for creating crafting recipes that contain custom items
+  - [ ] Add custom crafting recipes for custom items

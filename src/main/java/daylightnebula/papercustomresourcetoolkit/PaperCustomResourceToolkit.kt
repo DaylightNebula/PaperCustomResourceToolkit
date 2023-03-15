@@ -1,12 +1,11 @@
 package daylightnebula.papercustomresourcetoolkit
 
-import daylightnebula.papercustomresourcetoolkit.items.CustomItem
-import daylightnebula.papercustomresourcetoolkit.items.CustomItemCommand
-import daylightnebula.papercustomresourcetoolkit.items.CustomItemEventListener
+import daylightnebula.papercustomresourcetoolkit.items.*
 import daylightnebula.papercustomresourcetoolkit.packer.CreateAnimatedModelCommand
 import daylightnebula.papercustomresourcetoolkit.packer.FontManager
 import daylightnebula.papercustomresourcetoolkit.packer.ResourcePack
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
@@ -37,7 +36,24 @@ class PaperCustomResourceToolkit : JavaPlugin() {
 
     override fun onEnable() {
         // run finalize packer
-        Bukkit.getScheduler().runTaskLaterAsynchronously(this, Runnable { CustomItem.loadRemainingJSON(); ResourcePack.finalizePack() }, 0L)
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, Runnable {
+            CustomItem.loadRemainingJSON()
+            ResourcePack.finalizePack()
+            // todo remove me
+            CraftingRecipeUtils.shapedRecipe(
+                CustomItem.items["red-sword"]!!.itemStack,
+                "  R",
+                " R ",
+                "S  ",
+                RecipeElement('R', item(Material.REDSTONE)),
+                RecipeElement('S', item(Material.STICK))
+            )
+            CraftingRecipeUtils.shapelessRecipe(
+                item(Material.DIAMOND_SWORD),
+                CustomItem.items["red-sword"]!!.itemStack,
+                CustomItem.items["red-sword"]!!.itemStack,
+            )
+        }, 0L)
 
         // update loop
         updateTask = Bukkit.getScheduler().runTaskTimer(this, Runnable { update() }, 2L, 1L)
