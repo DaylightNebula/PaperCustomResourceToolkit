@@ -6,6 +6,9 @@ authors: [ DaylightNebula ]
 description: A simple toolkit for creating custom entities, blocks, and items.
 depends: [ ModelEngine ]
 commands:
+  getcustomitem:
+    description: Get custom item
+    usage: /getcustomitem <name or id> [amount]
   createanimatedmodel:
     description: yes
     usage: /createanimatedmodel <model id>

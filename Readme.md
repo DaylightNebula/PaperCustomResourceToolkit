@@ -26,11 +26,11 @@ Todolist:
     - [x] On load, offsets and dimensions can be registered for any image being loaded to font
   - [x] Load everything from .json files if we are not generating anything
 - [ ] Custom items (maybe able to steal from rpg toolkit)
-  - [ ] Load from json files
-  - [ ] Optionally use custom texture or model
-  - [ ] Extension functions for item stack
-    - [ ] Is Custom Item
-    - [ ] Get Custom Item (return null if not custom item)
+  - [x] Load from json files
+  - [x] Optionally use custom texture or model
+  - [x] Extension functions for item stack
+    - [x] Is Custom Item
+    - [x] Get Custom Item (return null if not custom item)
   - [ ] Settings
     - [ ] All the settings (list in rpg toolkit)
     - [ ] Custom Durability (0 means no durability and is default)

@@ -131,7 +131,7 @@ object ResourcePack {
             file.mkdirs()
     }
 
-    fun addAssetsFolder(folder: File) {
+    internal fun addAssetsFolder(folder: File) {
         if (!shouldGenerate) return
 
         // load every file in the folder that is passed in
