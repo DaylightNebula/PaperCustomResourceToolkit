@@ -1,0 +1,17 @@
+{
+  "displayName": "§0Dark Skeleton",
+  "supertype": "remove-me",
+  "maxHealth": 40.0,
+  "tasks": [
+    {
+      "type": "wander",
+      "range": 20.0,
+      "minWaitTicks": 30,
+      "maxWaitTicks": 100
+    },
+    {
+      "type": "attack_players",
+      "detectRange": 5.0
+    }
+  ]
+}

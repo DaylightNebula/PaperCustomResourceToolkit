@@ -1,0 +1,8 @@
+{
+  "displayName": "Red Sword",
+  "description": "The best great sword!",
+  "sourceMaterial": "sword-handheld",
+  "damage": 9.0,
+  "speed": -2.0,
+  "knockback": 4.0,
+}
