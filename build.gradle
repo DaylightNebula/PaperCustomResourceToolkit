@@ -34,7 +34,7 @@ dependencies {
 
     // math stuff
     implementation "org.joml:joml:1.10.3"
-    implementation "com.ticxo.modelengine:api:R3.1.5"
+    api "com.ticxo.modelengine:api:R3.1.5"
 }
 
 def targetJavaVersion = 19
@@ -77,5 +77,8 @@ jar {
 }
 
 shadowJar {
+    dependencies {
+        exclude("com.ticxo.modelengine:api:R3.1.5")
+    }
     destinationDirectory = file("/testserver/plugins")
 }

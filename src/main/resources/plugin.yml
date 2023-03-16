@@ -15,3 +15,9 @@ commands:
   removeanimatedmodels:
     description: yes
     usage: /removeanimatedmodels
+  spawnmob:
+    description: Spawn Custom Mob
+    usage: /spawnmob <mob id>
+  removenearbymobs:
+    description: Remove nearby custom mobs of a certain type or of all types
+    usage: /removenearbymobs <mob id> <range>

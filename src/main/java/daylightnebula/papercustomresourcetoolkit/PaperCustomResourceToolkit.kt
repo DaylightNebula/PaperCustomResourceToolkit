@@ -1,5 +1,9 @@
 package daylightnebula.papercustomresourcetoolkit
 
+import com.ticxo.modelengine.api.ModelEngineAPI
+import daylightnebula.papercustomresourcetoolkit.entities.CustomMob
+import daylightnebula.papercustomresourcetoolkit.entities.RemoveNearbyMobsCommand
+import daylightnebula.papercustomresourcetoolkit.entities.SpawnMobCommand
 import daylightnebula.papercustomresourcetoolkit.items.*
 import daylightnebula.papercustomresourcetoolkit.packer.CreateAnimatedModelCommand
 import daylightnebula.papercustomresourcetoolkit.packer.FontManager
@@ -39,20 +43,7 @@ class PaperCustomResourceToolkit : JavaPlugin() {
         Bukkit.getScheduler().runTaskLaterAsynchronously(this, Runnable {
             CustomItem.loadRemainingJSON()
             ResourcePack.finalizePack()
-            // todo remove me
-            CraftingRecipeUtils.shapedRecipe(
-                CustomItem.items["red-sword"]!!.itemStack,
-                "  R",
-                " R ",
-                "S  ",
-                RecipeElement('R', item(Material.REDSTONE)),
-                RecipeElement('S', item(Material.STICK))
-            )
-            CraftingRecipeUtils.shapelessRecipe(
-                item(Material.DIAMOND_SWORD),
-                CustomItem.items["red-sword"]!!.itemStack,
-                CustomItem.items["red-sword"]!!.itemStack,
-            )
+            CustomMob.loadRemainingJSON()
         }, 0L)
 
         // update loop
@@ -63,6 +54,8 @@ class PaperCustomResourceToolkit : JavaPlugin() {
 
         getCommand("createanimatedmodel")?.setExecutor(CreateAnimatedModelCommand())
         getCommand("getcustomitem")?.setExecutor(CustomItemCommand())
+        getCommand("spawnmob")?.setExecutor(SpawnMobCommand())
+        getCommand("removenearbymobs")?.setExecutor(RemoveNearbyMobsCommand())
     }
 
     override fun onDisable() {
@@ -81,5 +74,6 @@ class PaperCustomResourceToolkit : JavaPlugin() {
     fun addAssetsFolder(folder: File) {
         ResourcePack.addAssetsFolder(folder)
         CustomItem.loadJSONFromFolder(folder)
+        CustomMob.loadJSONFromFolder(folder)
     }
 }

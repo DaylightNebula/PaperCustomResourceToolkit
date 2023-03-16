@@ -25,7 +25,7 @@ Todolist:
     - [x] Easy way of adding custom fonts without overriding base text
     - [x] On load, offsets and dimensions can be registered for any image being loaded to font
   - [x] Load everything from .json files if we are not generating anything
-- [ ] Custom items (maybe able to steal from rpg toolkit)
+- [x] Custom items (maybe able to steal from rpg toolkit)
   - [x] Load from json files
   - [x] Optionally use custom texture or model
   - [x] Extension functions for item stack
