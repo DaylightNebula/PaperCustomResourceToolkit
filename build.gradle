@@ -78,7 +78,7 @@ jar {
 
 shadowJar {
     dependencies {
-        exclude("com.ticxo.modelengine:api:R3.1.5")
+        exclude(dependency("com.ticxo.modelengine:api:.*"))
     }
     destinationDirectory = file("/testserver/plugins")
 }
