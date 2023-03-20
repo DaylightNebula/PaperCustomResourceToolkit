@@ -50,15 +50,18 @@ Todolist:
     - [ ] Hardness
     - [ ] Name
     - [ ] Drops
-- [ ] Custom entities
-  - [ ] Allow json files to specify when certain animations should be used
-  - [ ] json files specific tasks
-  - [ ] Could just steal old system from rpg toolkit and modify it to use animations
-  - [ ] Task System
-    - [ ] Tasks sorted by priority that can be changed
-    - [ ] A task change can ONLY occur when a task marks itself as done or is marked "can be stopped prematurely"
-    - [ ] Start, stop, and update, you know the drill at this point
-    - [ ] Animations can be specified for the task to use or to be played while the task is running
+- [x] Custom entities
+  - [x] Allow json files to specify when certain animations should be used
+  - [x] json files specific tasks
+  - [x] Could just steal old system from rpg toolkit and modify it to use animations
+  - [x] Task System
+    - [x] Tasks sorted by priority that can be changed
+    - [x] A task change can ONLY occur when a task marks itself as done or is marked "can be stopped prematurely"
+    - [x] Start, stop, and update, you know the drill at this point
+    - [x] Animations can be specified for the task to use or to be played while the task is running
+- [ ] Custom UI elements
+  - [ ] Centering
+  - [ ] Load width from ascii.png
 - [ ] Custom GUIs
   - [ ] Allow to be easily created via json files
   - [ ] Easy way to hide slots
@@ -68,6 +71,7 @@ Todolist:
     - [ ] Button (fire event, optionally toggle to other texture)
     - [ ] Checkbox (cycle between textures for other options, fire event)
     - [ ] Labels (can be used to display text and have a custom background)
+    - [ ] Image display
     - [ ] Text buttons (could just add to button, check when this is being implemented)
 - [ ] Custom Armor and Tools
   - [ ] Extend based custom item

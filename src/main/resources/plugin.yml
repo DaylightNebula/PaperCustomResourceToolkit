@@ -21,3 +21,6 @@ commands:
   removenearbymobs:
     description: Remove nearby custom mobs of a certain type or of all types
     usage: /removenearbymobs <mob id> <range>
+  testui:
+    description: yes
+    usage: /testui

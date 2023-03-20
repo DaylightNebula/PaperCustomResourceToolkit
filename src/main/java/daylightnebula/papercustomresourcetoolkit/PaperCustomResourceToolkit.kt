@@ -8,6 +8,7 @@ import daylightnebula.papercustomresourcetoolkit.items.*
 import daylightnebula.papercustomresourcetoolkit.packer.CreateAnimatedModelCommand
 import daylightnebula.papercustomresourcetoolkit.packer.FontManager
 import daylightnebula.papercustomresourcetoolkit.packer.ResourcePack
+import daylightnebula.papercustomresourcetoolkit.uis.TestUICommand
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -56,6 +57,7 @@ class PaperCustomResourceToolkit : JavaPlugin() {
         getCommand("getcustomitem")?.setExecutor(CustomItemCommand())
         getCommand("spawnmob")?.setExecutor(SpawnMobCommand())
         getCommand("removenearbymobs")?.setExecutor(RemoveNearbyMobsCommand())
+        getCommand("testui")?.setExecutor(TestUICommand())
     }
 
     override fun onDisable() {

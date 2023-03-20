@@ -18,6 +18,7 @@ object FontManager {
     fun init() {
         // add base font and negative spaces
         addFont("default")
+        addFont("test", 18) // todo remove
         fontProviders.put(negativeSpacesJson)
     }
 
