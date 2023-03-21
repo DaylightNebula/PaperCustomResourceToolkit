@@ -1,8 +1,8 @@
 package daylightnebula.papercustomresourcetoolkit.uis
 
 import daylightnebula.papercustomresourcetoolkit.packer.FontResource
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.ComponentBuilder
 import net.kyori.adventure.text.TextComponent
 
 abstract class UIComponent {
@@ -20,6 +20,7 @@ class TextUIComponent(val resource: FontResource, val text: String): UIComponent
     }
 
     override fun render(builder: TextComponent.Builder) {
-        builder.append(Component.text(text))
+//        builder.append(Component.text("").font(Key.key("test")))
+//        builder.append(Component.text(String(text.map { it + resource.firstChar }.toCharArray())))
     }
 }

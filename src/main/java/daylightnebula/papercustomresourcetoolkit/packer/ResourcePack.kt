@@ -44,6 +44,7 @@ object ResourcePack {
     val texturesFolder = File(namespaceFolder, "textures/$namespace")
     val minecraftFolder = File(assetsFolder, "minecraft")
     val fontFolder = File(minecraftFolder, "font")
+    val namespacedFontFolder = File(namespaceFolder, "font")
     private val modelsFolder = File(minecraftFolder, "models")
     val itemFolder = File(modelsFolder, "item")
     private val blockFolder = File(modelsFolder, "block")
@@ -65,7 +66,6 @@ object ResourcePack {
     internal fun init() {
         // initialize sub system
         ItemAllocator.init()
-        FontManager.init()
 
         // get should generate config value
         shouldGenerate = ConfigManager.getValueFromJson("shouldGenerateResourcePack", true)
@@ -78,6 +78,7 @@ object ResourcePack {
             makeSureExistsAndClear(itemFolder)
             makeSureExistsAndClear(blockFolder)
             makeSureExistsAndClear(fontFolder)
+            makeSureExistsAndClear(namespacedFontFolder)
 
             // create meta file
             metaFile.writeText(packJson.toString(1))
@@ -243,8 +244,8 @@ abstract class Resource(val name: String)
 class ImageResource(name: String, val material: Material, val customModelID: Int): Resource(name)
 class StaticModelResource(name: String, val id: UUID, val material: Material, val customModelID: Int): Resource(name)
 class AnimatedModelResource(name: String): Resource(name)
-class TextImageResource(name: String, val offset: Int): Resource(name)
-class FontResource(name: String, val firstChar: Int): Resource(name)
+class TextImageResource(name: String, val char: Char): Resource(name)
+class FontResource(name: String, val id: String): Resource(name)
 class ResourcePackFinalizedEvent(val path: String, val hash: String): Event() {
     companion object {
         @JvmStatic

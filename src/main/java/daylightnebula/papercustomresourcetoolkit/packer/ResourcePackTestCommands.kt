@@ -1,6 +1,8 @@
 package daylightnebula.papercustomresourcetoolkit.packer
 
 import daylightnebula.papercustomresourcetoolkit.PaperCustomResourceToolkit
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -14,7 +16,8 @@ val activeTestStands = hashMapOf<BukkitTask, List<ArmorStand>>()
 class CreateAnimatedModelCommand: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
         ResourcePack.getAllResourcesOfType(ResourceType.TEXT_IMAGE)?.forEach {
-            sender.sendMessage("Text Image Resource named ${it.name} = ${(it as TextImageResource).offset.toChar()}")
+//            sender.sendMessage("Text Image Resource named ${it.name} = ${(it as TextImageResource).char}")
+            sender.sendMessage(Component.text((it as TextImageResource).char).font(Key.key("${ResourcePack.namespace}:textured")))
         }
 
 //        if (args == null || args.isEmpty()) {

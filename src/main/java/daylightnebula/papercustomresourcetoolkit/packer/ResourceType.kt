@@ -38,18 +38,18 @@ sealed class ResourceType<T: Resource>(val name: String, val toJson: (resource: 
         if (res is TextImageResource)
             JSONObject()
                 .put("name", res.name)
-                .put("offset", res.offset)
+                .put("char", res.char)
         else JSONObject()
     }, { json ->
-        TextImageResource(json.getString("name"), json.getInt("offset"))
+        TextImageResource(json.getString("name"), json.getString("char")[0])
     })
     object FONT : ResourceType<FontResource>("FONT", { res ->
         if (res is FontResource)
             JSONObject()
                 .put("name", res.name)
-                .put("firstChar", res.firstChar)
+                .put("id", res.id)
         else JSONObject()
     }, { json ->
-        FontResource(json.getString("name"), json.getInt("firstChar"))
+        FontResource(json.getString("name"), json.getString("id"))
     })
 }
